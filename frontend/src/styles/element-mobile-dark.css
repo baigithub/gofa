@@ -1,0 +1,45 @@
+.mobile-dark {
+  /* Element Plus CSS Vars (scoped to mobile frame) */
+  --el-bg-color: rgba(10, 16, 33, 0.92);
+  --el-bg-color-overlay: rgba(14, 22, 45, 0.92);
+  --el-fill-color-blank: rgba(10, 16, 33, 0.92);
+  --el-fill-color: rgba(22, 32, 60, 0.72);
+  --el-fill-color-light: rgba(22, 32, 60, 0.55);
+  --el-fill-color-lighter: rgba(22, 32, 60, 0.4);
+  --el-border-color: rgba(122, 155, 231, 0.25);
+  --el-border-color-light: rgba(122, 155, 231, 0.18);
+  --el-text-color-primary: #f2f6ff;
+  --el-text-color-regular: #c7d3f2;
+  --el-text-color-secondary: #9fb0cf;
+  --el-text-color-placeholder: #7084ab;
+  --el-color-primary: #2f7dff;
+  --el-color-primary-light-3: #5aa0ff;
+  --el-color-primary-light-5: #7bb7ff;
+  --el-color-success: #2dcf8f;
+  --el-color-warning: #ffb020;
+  --el-color-danger: #ff4d5a;
+  --el-box-shadow: 0 16px 30px rgba(3, 8, 20, 0.55);
+  --el-border-radius-base: 12px;
+  --el-font-size-base: 14px;
+
+  color-scheme: dark;
+}
+
+.mobile-dark .el-card {
+  background: linear-gradient(145deg, rgba(17, 25, 49, 0.72), rgba(8, 14, 29, 0.86));
+  border: 1px solid rgba(122, 155, 231, 0.22);
+  box-shadow: 0 18px 40px rgba(2, 6, 18, 0.52);
+  backdrop-filter: blur(8px);
+}
+
+.mobile-dark .el-input__wrapper,
+.mobile-dark .el-textarea__inner {
+  background: rgba(18, 26, 49, 0.92);
+  border: 1px solid rgba(123, 155, 232, 0.35);
+  box-shadow: none;
+}
+
+.mobile-dark .el-divider__text {
+  background: transparent;
+}
+

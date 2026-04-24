@@ -1,0 +1,67 @@
+:root {
+  /* Brand */
+  --color-primary: #1677ff;
+  --color-primary-pressed: #0958d9;
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+
+  /* Text */
+  --color-text-primary: #1f2329;
+  --color-text-secondary: #4e5969;
+  --color-text-placeholder: #86909c;
+
+  /* Status */
+  --color-status-pending-pay: #ff7d00;
+  --color-status-pending-take: #165dff;
+  --color-status-delivering: #722ed1;
+  --color-status-finished: #00b42a;
+  --color-status-cancelled: #86909c;
+  --color-danger: #f53f3f;
+
+  /* Border */
+  --color-border: #e5e6eb;
+
+  /* Font */
+  --font-family-base: "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial,
+    sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+}
+
