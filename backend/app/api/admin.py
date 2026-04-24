@@ -123,18 +123,7 @@ def list_roles_api(admin_user_id: str = Query(...), db: Session = Depends(get_db
         roles = list_roles(db)
     except ValueError as exc:
         raise ApiException(error_codes.FORBIDDEN, str(exc), status_code=403) from exc
-    data = [
-        RoleItem(
-            id=r.id,
-            code=r.code,
-            name=r.name,
-            description=r.description,
-            is_enabled=r.is_enabled,
-            created_at=r.created_at.isoformat(),
-            updated_at=r.updated_at.isoformat(),
-        ).model_dump()
-        for r in roles
-    ]
+    data = [RoleItem.model_validate(r).model_dump() for r in roles]
     return success(data)
 
 
@@ -149,17 +138,7 @@ def create_role_api(
         role = create_role(db, code=payload.code, name=payload.name, description=payload.description)
     except ValueError as exc:
         raise ApiException(error_codes.FORBIDDEN, str(exc), status_code=403) from exc
-    return success(
-        RoleItem(
-            id=role.id,
-            code=role.code,
-            name=role.name,
-            description=role.description,
-            is_enabled=role.is_enabled,
-            created_at=role.created_at.isoformat(),
-            updated_at=role.updated_at.isoformat(),
-        ).model_dump()
-    )
+    return success(RoleItem.model_validate(role).model_dump())
 
 
 @router.put("/roles/{role_id}")
@@ -174,17 +153,7 @@ def update_role_api(
         role = update_role(db, role_id=role_id, name=payload.name, description=payload.description)
     except ValueError as exc:
         raise ApiException(error_codes.FORBIDDEN, str(exc), status_code=403) from exc
-    return success(
-        RoleItem(
-            id=role.id,
-            code=role.code,
-            name=role.name,
-            description=role.description,
-            is_enabled=role.is_enabled,
-            created_at=role.created_at.isoformat(),
-            updated_at=role.updated_at.isoformat(),
-        ).model_dump()
-    )
+    return success(RoleItem.model_validate(role).model_dump())
 
 
 @router.post("/roles/{role_id}/enabled")
@@ -199,17 +168,7 @@ def set_role_enabled_api(
         role = set_role_enabled(db, role_id=role_id, is_enabled=payload.is_enabled)
     except ValueError as exc:
         raise ApiException(error_codes.FORBIDDEN, str(exc), status_code=403) from exc
-    return success(
-        RoleItem(
-            id=role.id,
-            code=role.code,
-            name=role.name,
-            description=role.description,
-            is_enabled=role.is_enabled,
-            created_at=role.created_at.isoformat(),
-            updated_at=role.updated_at.isoformat(),
-        ).model_dump()
-    )
+    return success(RoleItem.model_validate(role).model_dump())
 
 
 @router.delete("/roles/{role_id}")
@@ -294,5 +253,19 @@ def review_runner_verification_api(
         )
     except ValueError as exc:
         raise ApiException(error_codes.BAD_REQUEST, str(exc), status_code=400) from exc
-    return success(RunnerVerificationItem.model_validate(item).model_dump())
+    return success(
+        RunnerVerificationItem(
+            id=item.id,
+            user_id=item.user_id,
+            student_no=item.student_no,
+            credential_images=json.loads(item.credential_images or "[]") if item.credential_images else [],
+            verification_status=item.verification_status,
+            rejection_reason=item.rejection_reason,
+            reviewed_by=item.reviewed_by,
+            reviewed_at=item.reviewed_at,
+            is_verified=item.is_verified,
+            created_at=item.created_at,
+            updated_at=item.updated_at,
+        ).model_dump()
+    )
 

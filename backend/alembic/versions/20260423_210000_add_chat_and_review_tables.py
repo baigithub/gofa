@@ -38,7 +38,7 @@ def upgrade() -> None:
         sa.Column("user_id", mysql.CHAR(36), nullable=False),
         sa.Column("runner_id", mysql.CHAR(36), nullable=True),
         sa.Column("rating", sa.Integer(), nullable=False),
-        sa.Column("comment", sa.Text(), nullable=False, server_default=""),
+        sa.Column("comment", sa.Text(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["order_id"], ["orders.id"], name="fk_order_reviews_order_id"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_order_reviews_user_id"),

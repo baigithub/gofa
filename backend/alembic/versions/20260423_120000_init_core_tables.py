@@ -33,10 +33,16 @@ def upgrade() -> None:
         sa.Column("id", mysql.CHAR(36), primary_key=True),
         sa.Column("user_id", mysql.CHAR(36), nullable=False),
         sa.Column("student_no", sa.String(32), nullable=True),
+        sa.Column("credential_images", sa.String(2000), nullable=True),
+        sa.Column("verification_status", sa.String(20), nullable=False, server_default=sa.text("'pending'")),
+        sa.Column("rejection_reason", sa.String(500), nullable=True),
+        sa.Column("reviewed_by", mysql.CHAR(36), nullable=True),
+        sa.Column("reviewed_at", sa.DateTime(), nullable=True),
         sa.Column("is_verified", sa.Boolean(), nullable=False, server_default=sa.text("0")),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_runner_profiles_user_id"),
+        sa.ForeignKeyConstraint(["reviewed_by"], ["users.id"], name="fk_runner_profiles_reviewed_by"),
         sa.UniqueConstraint("user_id", name="uq_runner_profiles_user_id"),
     )
     op.create_index("ix_runner_profiles_user_id", "runner_profiles", ["user_id"], unique=False)
