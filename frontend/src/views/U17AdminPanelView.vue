@@ -35,6 +35,8 @@ const runnerReviews = ref<RunnerVerificationItem[]>([]);
 const currentUserPage = ref(1);
 const currentOrderPage = ref(1);
 const currentReviewPage = ref(1);
+const imagePreviewVisible = ref(false);
+const previewImageUrl = ref("");
 const USER_PAGE_SIZE = 4;
 const PAGE_SIZE = 2;
 
@@ -143,6 +145,11 @@ const rejectReview = async (item: RunnerVerificationItem) => {
     const msg = e instanceof Error ? e.message : "操作失败";
     ElMessage.error(msg);
   }
+};
+
+const openPreview = (url: string) => {
+  previewImageUrl.value = url;
+  imagePreviewVisible.value = true;
 };
 
 const updateRole = async (u: UserItem, role: UserItem["role"]) => {
@@ -425,8 +432,17 @@ const reviewPageLabel = computed(() => {
                   <div class="review-line"><span>手机号</span><strong>{{ item.phone }}</strong></div>
                   <div class="review-line"><span>学号</span><strong>{{ item.student_no || '—' }}</strong></div>
                   <div class="review-line"><span>状态</span><strong>{{ verificationStatusLabel(item.verification_status) }}</strong></div>
-                  <div class="review-line"><span>校园材料图片</span>
-                    <strong v-if="item.credential_images?.length">{{ item.credential_images.length }} 张</strong>
+                  <div class="review-line review-image-line">
+                    <span>校园材料图片</span>
+                    <div class="credential-thumb-wrap" v-if="item.credential_images?.length">
+                      <img
+                        class="credential-thumb"
+                        :src="item.credential_images[0]"
+                        alt="校园材料图片"
+                        @click="openPreview(item.credential_images[0])"
+                      />
+                      <span class="credential-hint">点击放大</span>
+                    </div>
                     <strong v-else>暂无</strong>
                   </div>
                   <div class="actions review-actions">
@@ -443,6 +459,10 @@ const reviewPageLabel = computed(() => {
           </template>
         </template>
       </section>
+
+      <el-dialog v-model="imagePreviewVisible" width="92%" top="8vh" append-to-body>
+        <img class="preview-dialog-image" :src="previewImageUrl" alt="校园材料大图" />
+      </el-dialog>
     </div>
   </MobileFrame>
 </template>
@@ -555,7 +575,7 @@ const reviewPageLabel = computed(() => {
 .order-grid,
 .review-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-3);
 }
 
@@ -588,7 +608,38 @@ const reviewPageLabel = computed(() => {
   word-break: break-word;
 }
 
+.review-image-line {
+  align-items: center;
+}
 
+.credential-thumb-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.credential-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(123, 155, 232, 0.2);
+  cursor: zoom-in;
+  background: rgba(10, 14, 26, 0.45);
+}
+
+.credential-hint {
+  font-size: 11px;
+  color: rgba(167, 186, 227, 0.78);
+}
+
+.preview-dialog-image {
+  width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  display: block;
+}
 
 .order-pager {
   margin-top: 10px;
