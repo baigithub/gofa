@@ -218,6 +218,7 @@ def list_runner_verifications(db: Session) -> list[dict]:
             User.phone,
         )
         .join(User, RunnerProfile.user_id == User.id)
+        .where(RunnerProfile.verification_status == "pending")
         .order_by(RunnerProfile.updated_at.desc())
     )
     rows = db.execute(stmt).all()

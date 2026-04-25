@@ -138,9 +138,10 @@ const actionText = (status: OrderStatus) => {
   return "查看详情";
 };
 
-const openDetail = (status: OrderStatus) => {
-  if (status === "待支付") emit("open-detail", "U11");
-  else if (status === "已完成") emit("open-detail", "U13");
+const openDetail = (order: UiOrder) => {
+  appStore.setActiveOrderId(order.id);
+  if (order.status === "待支付") emit("open-detail", "U11");
+  else if (order.status === "已完成") emit("open-detail", "U13");
   else emit("open-detail", "U12");
 };
 </script>

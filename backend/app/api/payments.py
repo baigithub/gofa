@@ -93,3 +93,17 @@ def wechat_callback_api(
         raise ApiException(error_codes.BAD_REQUEST, str(exc), status_code=400) from exc
     return success(CallbackResponse(success=True).model_dump())
 
+
+@router.post("/{order_id}/mock-success")
+def mock_success_payment_api(order_id: str, db: Session = Depends(get_db)):
+    try:
+        handle_wechat_callback(
+            db,
+            order_id=order_id,
+            provider_txn_id=f"mock_{order_id}",
+            status="success",
+        )
+    except ValueError as exc:
+        raise ApiException(error_codes.BAD_REQUEST, str(exc), status_code=400) from exc
+    return success(CallbackResponse(success=True).model_dump())
+

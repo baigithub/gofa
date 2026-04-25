@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 class UserItem(BaseModel):
     id: str
     phone: str
+    nickname: Optional[str]
     role: str
     is_enabled: bool
     created_at: str

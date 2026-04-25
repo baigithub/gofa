@@ -2,6 +2,7 @@
 import { defineAsyncComponent, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { clearAuth, setAuth } from "./core/auth";
+import { fetchRunnerDashboardStats } from "./api/runner";
 import { useAppStore } from "./stores/app";
 
 const U01LoginView = defineAsyncComponent(() => import("./views/U01LoginView.vue"));
@@ -48,7 +49,8 @@ const goService = (service: "U03" | "U04" | "U05") => {
   appStore.selectService(service);
 };
 
-const goPay = () => {
+const goPay = (orderId?: string) => {
+  if (orderId) appStore.setPendingOrderId(orderId);
   appStore.goPay();
 };
 
@@ -70,23 +72,41 @@ const onGoOrder = () => {
   appStore.setView("U11");
 };
 
-const onUserLogin = (payload?: { role?: "user" | "runner" | "admin"; token?: string; userId?: string; phone?: string }) => {
+const onUserLogin = (payload?: { role?: "user" | "runner" | "admin"; token?: string; userId?: string; phone?: string; nickname?: string | null }) => {
   const role = payload?.role ?? "user";
   console.info("[gofer] login.success", {
     role,
     userId: payload?.userId ?? null,
     phone: payload?.phone ?? null,
+    nickname: payload?.nickname ?? null,
   });
   setAuth(role, payload?.token, payload?.userId, payload?.phone);
   appStore.setRole(role);
   appStore.setUserId(payload?.userId ?? null);
   appStore.setUserPhone(payload?.phone ?? null);
+  appStore.setUserNickname(payload?.nickname ?? null);
   appStore.setView("U02");
 };
 
-const onGoRunner = () => {
+const onGoRunner = async () => {
   setAuth("runner", undefined, appStore.userId ?? undefined, appStore.userPhone ?? undefined);
   appStore.setRole("runner");
+
+  if (!appStore.userId) {
+    appStore.setView("R01");
+    return;
+  }
+
+  try {
+    const stats = await fetchRunnerDashboardStats(appStore.userId);
+    if (stats.is_verified && stats.verification_status === "approved") {
+      appStore.setView("R02");
+      return;
+    }
+  } catch (error) {
+    console.info("[gofer] check runner verification status failed", error);
+  }
+
   appStore.setView("R01");
 };
 
@@ -121,6 +141,7 @@ watch(currentView, (view) => {
   <U07CashierView
     v-else-if="currentView === 'U07'"
     :amount="orderAmount"
+    :order-id="appStore.pendingOrderId"
     @back="appStore.setView('U06')"
     @pay-failed="onPayFailed"
     @pay-success="onPaySuccess"

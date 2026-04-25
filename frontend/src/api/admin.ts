@@ -1,7 +1,14 @@
 import { http, unwrap, type ApiResult } from "./index";
 
 export type UserRoleCode = "user" | "runner" | "admin" | string;
-export type UserItem = { id: string; phone: string; role: UserRoleCode; is_enabled: boolean; created_at: string };
+export type UserItem = {
+  id: string;
+  phone: string;
+  nickname: string | null;
+  role: UserRoleCode;
+  is_enabled: boolean;
+  created_at: string;
+};
 export type RoleItem = {
   id: string;
   code: string;

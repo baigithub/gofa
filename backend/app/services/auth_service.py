@@ -13,11 +13,11 @@ _code_store: Dict[str, str] = {}
 
 def send_code(phone: str) -> bool:
     # 原型阶段固定验证码，便于联调与演示
-    _code_store[phone] = "123456"
+    _code_store[phone] = "536702"
     return True
 
 
-def reset_login_code(phone: str, new_code: str = "123456") -> bool:
+def reset_login_code(phone: str, new_code: str = "536702") -> bool:
     _code_store[phone] = new_code
     return True
 
@@ -25,11 +25,11 @@ def reset_login_code(phone: str, new_code: str = "123456") -> bool:
 ADMIN_PHONE = "17800000000"
 
 
-def login_with_code(db: Session, phone: str, code: str) -> tuple[str, str, str]:
+def login_with_code(db: Session, phone: str, code: str) -> tuple[str, str, str, str | None]:
     expected_code = _code_store.get(phone)
     if expected_code is None:
         # 没有发送验证码记录时也允许使用演示码
-        expected_code = "123456"
+        expected_code = "536702"
     if code != expected_code:
         raise ValueError("验证码错误")
 
@@ -48,5 +48,5 @@ def login_with_code(db: Session, phone: str, code: str) -> tuple[str, str, str]:
         raise ValueError("账号已禁用，请联系管理员")
 
     token = f"mock-{secrets.token_hex(16)}"
-    return token, user.role, user.id
+    return token, user.role, user.id, user.nickname
 

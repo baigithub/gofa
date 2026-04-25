@@ -37,6 +37,7 @@ const currentOrderPage = ref(1);
 const currentReviewPage = ref(1);
 const imagePreviewVisible = ref(false);
 const previewImageUrl = ref("");
+const orderSearch = ref("");
 const USER_PAGE_SIZE = 4;
 const PAGE_SIZE = 2;
 
@@ -148,6 +149,11 @@ const rejectReview = async (item: RunnerVerificationItem) => {
 };
 
 const openPreview = (url: string) => {
+  if (imagePreviewVisible.value && previewImageUrl.value === url) {
+    imagePreviewVisible.value = false;
+    previewImageUrl.value = "";
+    return;
+  }
   previewImageUrl.value = url;
   imagePreviewVisible.value = true;
 };
@@ -355,6 +361,9 @@ const reviewPageLabel = computed(() => {
                       <el-tag class="user-prefix-tag" type="info" effect="plain" round size="small">用户</el-tag>
                       <div class="phone">{{ u.phone }}</div>
                     </div>
+                    <el-tag class="nickname-tag" type="warning" effect="plain" round>
+                      {{ u.nickname || '未设置昵称' }}
+                    </el-tag>
                     <el-tag class="role-switch" :type="roleType(u.role)" effect="plain" round @click="switchUserRole(u)">
                       角色：{{ roleLabel(u.role) }}
                     </el-tag>
@@ -524,16 +533,16 @@ const reviewPageLabel = computed(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .user-line-top {
-  min-height: 26px;
+  min-height: 24px;
 }
 
 .user-line-bottom {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .user-line-inline {
@@ -694,19 +703,30 @@ const reviewPageLabel = computed(() => {
   line-height: 1.2;
   letter-spacing: 0.2px;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .phone-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
+  flex: 1;
 }
 
 .user-prefix-tag {
+  flex-shrink: 0;
+}
+
+.nickname-tag {
+  flex-shrink: 0;
+  max-width: 88px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-switch {
   flex-shrink: 0;
 }
 

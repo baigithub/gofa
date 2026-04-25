@@ -4,7 +4,6 @@ import { ElButton, ElTag, ElAlert, ElIcon } from "element-plus";
 import { Timer, Wallet, Lock } from "@element-plus/icons-vue";
 import { useAppStore } from "../stores/app";
 import { fetchRunnerDashboardStats, type RunnerDashboardStats } from "../api/runner";
-import OrderCard from "../components/OrderCard.vue";
 
 const emit = defineEmits<{(event:"next"):void;(event:"back-home"):void;(event:"go-profile"):void;}>();
 const appStore = useAppStore();
@@ -70,19 +69,10 @@ onMounted(async () => {
 
       <section class="list">
         <div class="section-head">
-          <span class="section-title">推荐订单</span>
-          <span class="section-sub">最新刷新</span>
+          <span class="section-title">可接订单</span>
+          <span class="section-sub">实时数据</span>
         </div>
-        <OrderCard
-          type="帮取快递"
-          from="北门驿站"
-          to="1号宿舍楼"
-          amount="¥8.00"
-          time="剩余 8 分钟"
-          status="待接单"
-          :action-text="isReviewing ? '审核中' : '立即接单'"
-          @action="isReviewing ? undefined : emit('next')"
-        />
+        <el-alert title="当前暂无可接订单" type="info" :closable="false" show-icon />
       </section>
 
       <footer class="footer">

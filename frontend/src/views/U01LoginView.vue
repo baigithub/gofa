@@ -7,13 +7,12 @@ import { login, sendCode } from "../api/auth";
 const emit = defineEmits<{
   (
     event: "login-success",
-    payload?: { role: "user" | "runner" | "admin"; token: string; userId: string; phone: string },
+    payload?: { role: "user" | "runner" | "admin"; token: string; userId: string; phone: string; nickname?: string | null },
   ): void;
 }>();
 
 const phone = ref("");
 const code = ref("");
-const isRunner = ref(false);
 const sendingCode = ref(false);
 const submitting = ref(false);
 
@@ -44,10 +43,6 @@ const submit = async () => {
   submitting.value = true;
   try {
     const result = await login({ phone: phone.value, code: code.value });
-    if (isRunner.value && result.role !== "runner" && result.role !== "admin") {
-      ElMessage.warning("该账号未分配跑腿员角色，请联系管理员在「管理员面板」中设置");
-      return;
-    }
     ElMessage.success("登录成功");
     emit("login-success", { ...result, phone: phone.value });
   } catch (error) {
@@ -95,9 +90,6 @@ const scanLogin = () => {
             <el-input v-model="code" maxlength="6" placeholder="请输入 6 位验证码" clearable />
             <el-button class="ghost-btn" :loading="sendingCode" @click="onSendCode">获取验证码</el-button>
           </div>
-        </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="isRunner" :disabled="submitting || sendingCode">是否跑腿员</el-checkbox>
         </el-form-item>
       </el-form>
 

@@ -48,7 +48,9 @@ export const useAppStore = defineStore("app", {
     userRole: "user" as UserRole,
     userId: null as string | null,
     userPhone: null as string | null,
+    userNickname: null as string | null,
     activeOrderId: "latest",
+    pendingOrderId: null as string | null,
     chatMessages: [] as ChatMessage[],
   }),
   actions: {
@@ -74,6 +76,9 @@ export const useAppStore = defineStore("app", {
       this.currentView = "U07";
       this.payStatus = "idle";
     },
+    setPendingOrderId(orderId: string | null) {
+      this.pendingOrderId = orderId;
+    },
     markPaySuccess() {
       this.payStatus = "success";
       this.currentView = "U08";
@@ -91,9 +96,13 @@ export const useAppStore = defineStore("app", {
     setUserPhone(userPhone: string | null) {
       this.userPhone = userPhone;
     },
+    setUserNickname(userNickname: string | null) {
+      this.userNickname = userNickname;
+    },
     clearAccount() {
       this.userId = null;
       this.userPhone = null;
+      this.userNickname = null;
       this.userRole = "user";
     },
     setActiveOrderId(orderId: string) {

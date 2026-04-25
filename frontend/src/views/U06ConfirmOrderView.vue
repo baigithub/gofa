@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { ElMessage } from "element-plus";
 import AppButton from "../components/AppButton.vue";
 import AppNavBar from "../components/AppNavBar.vue";
+import { createOrder } from "../api/orders";
 import { useAppStore } from "../stores/app";
 
 const props = defineProps<{
@@ -10,7 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: "back"): void;
-  (event: "submit-pay"): void;
+  (event: "submit-pay", orderId: string): void;
 }>();
 
 const serviceName = computed(() => {
@@ -20,10 +22,48 @@ const serviceName = computed(() => {
 });
 
 const appStore = useAppStore();
+const creatingOrder = ref(false);
 
 const fee = computed(() => {
   return appStore.calcFee();
 });
+
+const orderType = computed(() => {
+  if (props.serviceType === "U03") return "pickup" as const;
+  if (props.serviceType === "U04") return "buy" as const;
+  return "errand" as const;
+});
+
+const submitOrderAndPay = async () => {
+  if (!appStore.userId) {
+    ElMessage.error("请先登录后再下单");
+    return;
+  }
+  if (creatingOrder.value) return;
+  creatingOrder.value = true;
+  try {
+    const payload = {
+      user_id: appStore.userId,
+      order_type: orderType.value,
+      pickup_address: "北门驿站",
+      delivery_address: "1号宿舍楼",
+      contact_phone: appStore.userPhone || "17800000000",
+      remark: `${serviceName.value}下单`,
+      amount_cents: Math.round(fee.value.total * 100),
+    };
+    console.info("[gofer] order.create.request", payload);
+    const order = await createOrder(payload);
+    console.info("[gofer] order.create.success", order);
+    ElMessage.success("订单已创建，请完成支付");
+    emit("submit-pay", order.id);
+  } catch (error) {
+    console.error("[gofer] order.create.failed", error);
+    const msg = error instanceof Error ? error.message : "下单失败";
+    ElMessage.error(msg);
+  } finally {
+    creatingOrder.value = false;
+  }
+};
 </script>
 
 <template>
@@ -63,7 +103,7 @@ const fee = computed(() => {
 
       <footer class="footer">
         <p class="tip">提交即表示同意《跑腿服务协议》</p>
-        <AppButton @click="emit('submit-pay')">提交并支付</AppButton>
+        <AppButton :disabled="creatingOrder" @click="submitOrderAndPay">{{ creatingOrder ? '提交中...' : '提交并支付' }}</AppButton>
         <AppButton variant="secondary" @click="emit('back')">返回修改</AppButton>
       </footer>
     </section>

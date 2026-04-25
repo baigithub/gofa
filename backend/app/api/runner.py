@@ -33,7 +33,7 @@ from ..services.runner_service import (
 )
 
 router = APIRouter(prefix="/api/v1/runner", tags=["runner"])
-UPLOAD_DIR = Path("uploadfile")
+UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploadfile"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 

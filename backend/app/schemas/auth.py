@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -18,4 +20,5 @@ class LoginResponse(BaseModel):
     token: str
     role: str
     user_id: str
+    nickname: Optional[str] = None
 

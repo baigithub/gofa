@@ -36,7 +36,7 @@ app.include_router(admin_router)
 app.include_router(orders_router)
 app.include_router(payments_router)
 app.include_router(runner_router)
-UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploadfile"
+UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploadfile"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploadfile", StaticFiles(directory=str(UPLOAD_DIR)), name="uploadfile")
 

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { ElMessage } from "element-plus";
 import AppButton from "../components/AppButton.vue";
 import AppNavBar from "../components/AppNavBar.vue";
+import { createPayment, mockPaySuccess } from "../api/orders";
 
 const props = defineProps<{
   amount: number;
+  orderId: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -17,16 +20,23 @@ const paying = ref(false);
 
 const submitPay = async () => {
   if (paying.value) return;
-  paying.value = true;
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  paying.value = false;
-  // 模拟支付结果：70% 成功，30% 失败
-  const isSuccess = Math.random() < 0.7;
-  if (isSuccess) {
-    emit("pay-success");
+  if (!props.orderId) {
+    ElMessage.error("缺少订单信息，请返回重新下单");
+    emit("pay-failed");
     return;
   }
-  emit("pay-failed");
+  paying.value = true;
+  try {
+    await createPayment(props.orderId);
+    await mockPaySuccess(props.orderId);
+    emit("pay-success");
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "支付失败";
+    ElMessage.error(msg);
+    emit("pay-failed");
+  } finally {
+    paying.value = false;
+  }
 };
 </script>
 
@@ -38,7 +48,7 @@ const submitPay = async () => {
       <section class="content">
         <article class="card">
           <p class="label">订单号</p>
-          <p class="value">202604230001</p>
+          <p class="value">{{ props.orderId || '—' }}</p>
           <p class="label">支付金额</p>
           <p class="amount">¥{{ amount.toFixed(2) }}</p>
         </article>

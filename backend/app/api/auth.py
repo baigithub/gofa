@@ -41,8 +41,8 @@ def login(
     db: Session = Depends(get_db),
 ):
     try:
-        token, role, user_id = login_with_code(db, payload.phone, payload.code)
+        token, role, user_id, nickname = login_with_code(db, payload.phone, payload.code)
     except ValueError as exc:
         raise ApiException(error_codes.BAD_REQUEST, str(exc), status_code=400) from exc
-    return success(LoginResponse(token=token, role=role, user_id=user_id).model_dump())
+    return success(LoginResponse(token=token, role=role, user_id=user_id, nickname=nickname).model_dump())
 

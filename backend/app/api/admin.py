@@ -1,6 +1,7 @@
 import json
 
 from fastapi import APIRouter, Body, Depends, Query
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from ..models import User
 
@@ -53,6 +54,7 @@ def list_users_api(admin_user_id: str = Query(...), db: Session = Depends(get_db
         UserItem(
             id=u.id,
             phone=u.phone,
+            nickname=u.nickname,
             role=u.role,
             is_enabled=u.is_enabled,
             created_at=u.created_at.isoformat(),
