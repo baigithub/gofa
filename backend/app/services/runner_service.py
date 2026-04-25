@@ -45,17 +45,33 @@ def list_hall_orders(db: Session) -> list[Order]:
     return list(db.execute(stmt).scalars().all())
 
 
+def list_runner_history_orders(db: Session, runner_user_id: str) -> list[Order]:
+    runner = db.execute(select(RunnerProfile).where(RunnerProfile.user_id == runner_user_id)).scalar_one_or_none()
+    if runner is None:
+        raise ValueError("跑腿员不存在")
+
+    stmt = (
+        select(Order)
+        .where(Order.runner_id == runner.id)
+        .order_by(Order.updated_at.desc())
+    )
+    return list(db.execute(stmt).scalars().all())
+
+
 def accept_order(db: Session, order_id: str, runner_id: str) -> bool:
     order = db.execute(select(Order).where(Order.id == order_id)).scalar_one_or_none()
     if order is None:
         raise ValueError("订单不存在")
+
     runner = db.execute(select(RunnerProfile).where(RunnerProfile.id == runner_id)).scalar_one_or_none()
+    if runner is None:
+        runner = db.execute(select(RunnerProfile).where(RunnerProfile.user_id == runner_id)).scalar_one_or_none()
     if runner is None:
         raise ValueError("跑腿员不存在")
     if runner.verification_status != "approved" or not runner.is_verified:
         raise ValueError("您的认证还在审核中，请耐心等待～")
 
-    order.runner_id = runner_id
+    order.runner_id = runner.id
     transition_order_status(db, order, "accepted", "跑腿员接单")
     db.commit()
     return True
@@ -65,7 +81,14 @@ def delivered_order(db: Session, order_id: str, runner_id: str) -> bool:
     order = db.execute(select(Order).where(Order.id == order_id)).scalar_one_or_none()
     if order is None:
         raise ValueError("订单不存在")
-    if order.runner_id != runner_id:
+
+    runner = db.execute(select(RunnerProfile).where(RunnerProfile.id == runner_id)).scalar_one_or_none()
+    if runner is None:
+        runner = db.execute(select(RunnerProfile).where(RunnerProfile.user_id == runner_id)).scalar_one_or_none()
+    if runner is None:
+        raise ValueError("跑腿员不存在")
+
+    if order.runner_id != runner.id:
         raise ValueError("无权限操作此订单")
     transition_order_status(db, order, "completed", "跑腿员确认送达")
     order.completed_at = datetime.utcnow()

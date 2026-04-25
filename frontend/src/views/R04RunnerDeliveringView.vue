@@ -4,7 +4,7 @@ const emit = defineEmits<{(event:"next"):void;(event:"back"):void;}>();
 </script>
 <template>
   <main class="page"><section class="phone">
-    <section class="card"><h1>配送中</h1><p>状态：已取货，正在前往送达点</p><p>凭证上传：已拍照（原型）</p></section>
+    <section class="card"><h1>配送中</h1><p>状态：已取货，正在前往送达点</p><p>凭证上传：已拍照</p></section>
     <footer class="footer"><AppButton @click="emit('next')">确认送达</AppButton><AppButton variant="secondary" @click="emit('back')">返回订单</AppButton></footer>
   </section></main>
 </template>

@@ -41,10 +41,6 @@ watch(
   { immediate: true },
 );
 
-watch(currentView, (view) => {
-  console.info(`[gofer] currentView=${view}`);
-}, { immediate: true });
-
 const goService = (service: "U03" | "U04" | "U05") => {
   appStore.selectService(service);
 };
@@ -70,6 +66,20 @@ const onViewOrder = () => {
 const onGoOrder = () => {
   // 支付失败后回到待支付订单详情，支持重新支付
   appStore.setView("U11");
+};
+
+const onOpenRecentOrder = (payload: { orderId: string; status: string }) => {
+  appStore.setActiveOrderId(payload.orderId);
+  if (payload.status === "pending_pay") {
+    appStore.setPendingOrderId(payload.orderId);
+    appStore.setView("U11");
+    return;
+  }
+  if (payload.status === "completed" || payload.status === "cancelled") {
+    appStore.setView("U13");
+    return;
+  }
+  appStore.setView("U12");
 };
 
 const onUserLogin = (payload?: { role?: "user" | "runner" | "admin"; token?: string; userId?: string; phone?: string; nickname?: string | null }) => {
@@ -121,14 +131,16 @@ const onContactRunner = () => {
   appStore.contactRunnerFromUser();
 };
 
-watch(currentView, (view) => {
-  console.info(`[gofer] currentView=${view}`);
-}, { immediate: true });
 </script>
 
 <template>
   <U01LoginView v-if="currentView === 'U01'" @login-success="onUserLogin" />
-  <U02HomeView v-else-if="currentView === 'U02'" @go-service="goService" @go-page="appStore.setView($event)" />
+  <U02HomeView
+    v-else-if="currentView === 'U02'"
+    @go-service="goService"
+    @go-page="appStore.setView($event)"
+    @open-recent-order="onOpenRecentOrder"
+  />
   <U03PickupView v-else-if="currentView === 'U03'" @back="appStore.setView('U02')" @next="appStore.setView('U06')" />
   <U04BuyView v-else-if="currentView === 'U04'" @back="appStore.setView('U02')" @next="appStore.setView('U06')" />
   <U05ErrandView v-else-if="currentView === 'U05'" @back="appStore.setView('U02')" @next="appStore.setView('U06')" />

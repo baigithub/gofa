@@ -33,6 +33,21 @@ export type RunnerDashboardStats = {
   rejection_reason: string | null;
 };
 
+export type RunnerOrderItem = {
+  id: string;
+  user_id: string;
+  runner_id: string | null;
+  order_type: "pickup" | "buy" | "errand";
+  status: "pending_pay" | "pending_take" | "accepted" | "delivering" | "completed" | "cancelled";
+  pickup_address: string | null;
+  delivery_address: string | null;
+  contact_phone: string;
+  remark: string | null;
+  amount_cents: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export const fetchRunnerDashboardStats = async (runnerUserId: string) => {
   const { data } = await http.get<ApiResult<RunnerDashboardStats>>(`/runner/stats?runner_user_id=${encodeURIComponent(runnerUserId)}`);
   return unwrap(data);
@@ -67,6 +82,23 @@ export const sendOrderChat = async (orderId: string, payload: { sender_user_id: 
   const { data } = await http.post<ApiResult<ChatMessageItem>>(
     `/runner/orders/${encodeURIComponent(orderId)}/chats`,
     payload,
+  );
+  return unwrap(data);
+};
+
+export const fetchRunnerHistoryOrders = async (runnerUserId: string) => {
+  const { data } = await http.get<ApiResult<RunnerOrderItem[]>>(`/runner/orders/history?runner_user_id=${encodeURIComponent(runnerUserId)}`);
+  return unwrap(data);
+};
+
+export const fetchHallOrders = async () => {
+  const { data } = await http.get<ApiResult<RunnerOrderItem[]>>("/runner/orders/hall");
+  return unwrap(data);
+};
+
+export const acceptOrder = async (orderId: string, runnerUserId: string) => {
+  const { data } = await http.post<ApiResult<{ success: boolean }>>(
+    `/runner/orders/${encodeURIComponent(orderId)}/accept?runner_id=${encodeURIComponent(runnerUserId)}`,
   );
   return unwrap(data);
 };

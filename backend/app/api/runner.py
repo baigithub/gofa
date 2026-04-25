@@ -28,6 +28,7 @@ from ..services.runner_service import (
     get_review,
     list_hall_orders,
     list_order_chats,
+    list_runner_history_orders,
     send_order_chat,
     submit_review,
 )
@@ -85,6 +86,16 @@ def runner_dashboard_stats_api(runner_user_id: str = Query(...), db: Session = D
 @router.get("/orders/hall")
 def hall_orders_api(db: Session = Depends(get_db)):
     items = list_hall_orders(db)
+    data = [RunnerOrderItem.model_validate(item).model_dump() for item in items]
+    return success(data)
+
+
+@router.get("/orders/history")
+def runner_history_orders_api(runner_user_id: str = Query(...), db: Session = Depends(get_db)):
+    try:
+        items = list_runner_history_orders(db, runner_user_id=runner_user_id)
+    except ValueError as exc:
+        raise ApiException(error_codes.BAD_REQUEST, str(exc), status_code=400) from exc
     data = [RunnerOrderItem.model_validate(item).model_dump() for item in items]
     return success(data)
 

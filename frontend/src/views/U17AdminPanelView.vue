@@ -263,8 +263,29 @@ const formatTime = (value: string | null) => {
   return d.toLocaleString();
 };
 
+const statusLabel = (status: string) => {
+  if (status === "pending_pay") return "待支付";
+  if (status === "pending_take") return "待接单";
+  if (status === "accepted") return "已接单";
+  if (status === "delivering") return "配送中";
+  if (status === "completed") return "已完成";
+  if (status === "cancelled") return "已取消";
+  return status;
+};
+
+const filteredOrders = computed(() => {
+  const keyword = orderSearch.value.trim();
+  if (!keyword) return orders.value;
+  return orders.value.filter((item) =>
+    item.order_id.includes(keyword) ||
+    item.initiator.includes(keyword) ||
+    (item.runner || "").includes(keyword) ||
+    (item.order_content || "").includes(keyword),
+  );
+});
+
 const sortedOrders = computed(() => {
-  return [...orders.value].sort((a, b) => {
+  return [...filteredOrders.value].sort((a, b) => {
     const ta = a.required_completed_at ? new Date(a.required_completed_at).getTime() : 0;
     const tb = b.required_completed_at ? new Date(b.required_completed_at).getTime() : 0;
     return tb - ta;
@@ -291,6 +312,11 @@ const pagedRunnerReviews = computed(() => {
 
 const hasNextPage = computed(() => currentOrderPage.value * PAGE_SIZE < sortedOrders.value.length);
 const hasNextReviewPage = computed(() => currentReviewPage.value * PAGE_SIZE < sortedRunnerReviews.value.length);
+
+const goPrevPage = () => {
+  if (currentOrderPage.value <= 1) return;
+  currentOrderPage.value -= 1;
+};
 
 const goNextPage = () => {
   if (!hasNextPage.value) return;

@@ -1,27 +1,58 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { ElButton, ElTag, ElAlert, ElIcon } from "element-plus";
-import { Timer, Wallet, Lock } from "@element-plus/icons-vue";
+import { ElButton, ElTag, ElAlert, ElIcon, ElMessage } from "element-plus";
+import { Timer, Wallet } from "@element-plus/icons-vue";
 import { useAppStore } from "../stores/app";
-import { fetchRunnerDashboardStats, type RunnerDashboardStats } from "../api/runner";
+import { fetchRunnerDashboardStats, fetchHallOrders, acceptOrder, type RunnerDashboardStats, type RunnerOrderItem } from "../api/runner";
+import OrderCard from "../components/OrderCard.vue";
 
 const emit = defineEmits<{(event:"next"):void;(event:"back-home"):void;(event:"go-profile"):void;}>();
 const appStore = useAppStore();
 const stats = ref<RunnerDashboardStats | null>(null);
+const hallOrders = ref<RunnerOrderItem[]>([]);
 
 const isReviewing = computed(() => stats.value ? !stats.value.is_verified || stats.value.verification_status !== "approved" : false);
 const todayEarnings = computed(() => `¥${((stats.value?.today_earnings_cents ?? 0) / 100).toFixed(2)}`);
-const availableOrderCount = computed(() => stats.value?.available_order_count ?? 0);
+const availableOrderCount = computed(() => stats.value?.available_order_count ?? hallOrders.value.length);
 const statsHint = computed(() => (stats.value ? "数据已更新" : "正在同步数据"));
+
+const typeLabel = (type: RunnerOrderItem["order_type"]) => {
+  if (type === "pickup") return "帮取快递";
+  if (type === "buy") return "帮买商品";
+  return "万能跑腿";
+};
+
+const load = async () => {
+  if (!appStore.userId) return;
+  try {
+    const [statsData, orders] = await Promise.all([
+      fetchRunnerDashboardStats(appStore.userId),
+      fetchHallOrders(),
+    ]);
+    stats.value = statsData;
+    hallOrders.value = orders.filter((item) => item.status === "pending_take");
+  } catch (error) {
+    console.info("[gofer] load runner hall data failed", error);
+  }
+};
+
+const onAccept = async (order: RunnerOrderItem) => {
+  if (!appStore.userId) return;
+  if (isReviewing.value) return;
+  try {
+    await acceptOrder(order.id, appStore.userId);
+    ElMessage.success("接单成功");
+    appStore.setActiveOrderId(order.id);
+    emit("next");
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "接单失败";
+    ElMessage.error(msg);
+  }
+};
 
 onMounted(async () => {
   console.info("[gofer] mount R02RunnerHallView");
-  if (!appStore.userId) return;
-  try {
-    stats.value = await fetchRunnerDashboardStats(appStore.userId);
-  } catch (error) {
-    console.info("[gofer] load runner stats failed", error);
-  }
+  await load();
 });
 </script>
 <template>
@@ -72,7 +103,28 @@ onMounted(async () => {
           <span class="section-title">可接订单</span>
           <span class="section-sub">实时数据</span>
         </div>
-        <el-alert title="当前暂无可接订单" type="info" :closable="false" show-icon />
+
+        <el-alert
+          v-if="hallOrders.length === 0"
+          title="当前暂无可接订单"
+          type="info"
+          :closable="false"
+          show-icon
+        />
+
+        <OrderCard
+          v-for="item in hallOrders"
+          v-else
+          :key="item.id"
+          :type="typeLabel(item.order_type)"
+          :from="item.pickup_address || '待补充'"
+          :to="item.delivery_address || '待补充'"
+          :amount="`¥${(item.amount_cents / 100).toFixed(2)}`"
+          :time="'刚刚发布'"
+          status="待接单"
+          :action-text="isReviewing ? '审核中' : '立即接单'"
+          @action="isReviewing ? undefined : onAccept(item)"
+        />
       </section>
 
       <footer class="footer">

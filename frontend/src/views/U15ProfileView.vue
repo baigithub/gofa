@@ -15,6 +15,7 @@ const emit = defineEmits<{
 const appStore = useAppStore();
 
 const profilePhone = computed(() => appStore.userPhone || getUserPhone() || "17800000011");
+const profileNickname = computed(() => appStore.userNickname || "同学");
 const profileLevel = computed(() =>
   appStore.userRole === "admin" ? "管理员" : appStore.userRole === "runner" ? "跑腿员" : "普通用户",
 );

@@ -9,8 +9,8 @@ import { useAppStore } from "../stores/app";
 
 const appStore = useAppStore();
 
-type OrderStatus = "待支付" | "待接单" | "已接单" | "配送中" | "已完成";
-type TabKey = "全部" | "待支付" | "进行中" | "已完成";
+type OrderStatus = "待支付" | "待接单" | "已接单" | "配送中" | "已完成" | "已取消";
+type TabKey = "全部" | "待支付" | "进行中" | "已完成" | "已取消";
 type UiOrder = {
   id: string;
   type: string;
@@ -218,7 +218,7 @@ const openDetail = (order: UiOrder) => {
           :time="order.time"
           :status="order.status"
           :action-text="actionText(order.status)"
-          @action="openDetail(order.status)"
+          @action="openDetail(order)"
         />
         <div v-if="!isLoading && !isError && canLoadMore" class="load-more">
           <el-button size="small" round @click="loadMore">点击加载更多</el-button>
