@@ -28,6 +28,7 @@ class RunnerActionResponse(BaseModel):
 class RunnerVerificationItem(BaseModel):
     id: str
     user_id: str
+    phone: str
     student_no: Optional[str]
     credential_images: list[str] = Field(default_factory=list)
     verification_status: str

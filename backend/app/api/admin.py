@@ -2,6 +2,7 @@ import json
 
 from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy.orm import Session
+from ..models import User
 
 from ..core import error_codes
 from ..core.db import get_db
@@ -206,7 +207,7 @@ def list_runner_verifications_api(admin_user_id: str = Query(...), db: Session =
             RunnerVerificationItem(
                 id=item["id"],
                 user_id=item["user_id"],
-                phone=item.get("phone", ""),
+                phone=item["phone"],
                 student_no=item.get("student_no"),
                 credential_images=images,
                 verification_status=item.get("verification_status", "pending"),
@@ -254,10 +255,14 @@ def review_runner_verification_api(
         )
     except ValueError as exc:
         raise ApiException(error_codes.BAD_REQUEST, str(exc), status_code=400) from exc
+    phone = db.execute(
+        select(User.phone).where(User.id == item.user_id)
+    ).scalar_one_or_none()
     return success(
         RunnerVerificationItem(
             id=item.id,
             user_id=item.user_id,
+            phone=phone or "",
             student_no=item.student_no,
             credential_images=json.loads(item.credential_images or "[]") if item.credential_images else [],
             verification_status=item.verification_status,

@@ -91,6 +91,11 @@ export const useAppStore = defineStore("app", {
     setUserPhone(userPhone: string | null) {
       this.userPhone = userPhone;
     },
+    clearAccount() {
+      this.userId = null;
+      this.userPhone = null;
+      this.userRole = "user";
+    },
     setActiveOrderId(orderId: string) {
       this.activeOrderId = orderId || "latest";
     },

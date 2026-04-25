@@ -9,11 +9,12 @@ const emit = defineEmits<{
   (event: "back-home"): void;
   (event: "go-runner"): void;
   (event: "go-admin"): void;
+  (event: "logout"): void;
 }>();
 
 const appStore = useAppStore();
 
-const profilePhone = computed(() => appStore.userPhone || getUserPhone() || getUserId() || "17800000011");
+const profilePhone = computed(() => appStore.userPhone || getUserPhone() || "17800000011");
 const profileLevel = computed(() =>
   appStore.userRole === "admin" ? "管理员" : appStore.userRole === "runner" ? "跑腿员" : "普通用户",
 );
@@ -83,7 +84,10 @@ const quickEntries = [
             进入管理端
           </el-button>
         </div>
-        <el-button class="home-btn" size="large" round @click="emit('back-home')">返回首页</el-button>
+        <div class="bottom-actions">
+          <el-button class="logout-btn" size="large" round type="warning" plain @click="emit('logout')">注销</el-button>
+          <el-button class="home-btn" size="large" round @click="emit('back-home')">返回首页</el-button>
+        </div>
       </footer>
     </div>
   </MobileFrame>
@@ -166,7 +170,8 @@ const quickEntries = [
   gap: var(--space-2);
 }
 
-.panel-actions {
+.panel-actions,
+.bottom-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
@@ -174,6 +179,7 @@ const quickEntries = [
 
 .runner-btn,
 .admin-btn,
+.logout-btn,
 .home-btn {
   width: 100%;
   min-height: 44px;

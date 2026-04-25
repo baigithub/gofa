@@ -123,7 +123,12 @@ export const fetchRunnerVerifications = async (adminUserId: string) => {
   const { data } = await http.get<ApiResult<RunnerVerificationItem[]>>("/admin/runner-verifications", {
     params: { admin_user_id: adminUserId },
   });
-  return unwrap(data);
+  const items = unwrap(data);
+  console.info("[gofer] admin.runner-verifications.response", {
+    count: items.length,
+    items,
+  });
+  return items;
 };
 
 export const submitRunnerVerification = async (

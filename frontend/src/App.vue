@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineAsyncComponent, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { setAuth } from "./core/auth";
+import { clearAuth, setAuth } from "./core/auth";
 import { useAppStore } from "./stores/app";
 
 const U01LoginView = defineAsyncComponent(() => import("./views/U01LoginView.vue"));
@@ -85,11 +85,16 @@ const onUserLogin = (payload?: { role?: "user" | "runner" | "admin"; token?: str
 };
 
 const onGoRunner = () => {
-  setAuth("runner");
+  setAuth("runner", undefined, appStore.userId ?? undefined, appStore.userPhone ?? undefined);
   appStore.setRole("runner");
-  appStore.setUserId(null);
-  appStore.setUserPhone(null);
   appStore.setView("R01");
+};
+
+const onLogout = () => {
+  clearAuth();
+  appStore.clearAccount();
+  appStore.setView("U01");
+  console.info("[gofer] logout.success");
 };
 
 const onContactRunner = () => {
@@ -156,6 +161,7 @@ watch(currentView, (view) => {
     @back-home="appStore.setView('U02')"
     @go-runner="onGoRunner"
     @go-admin="appStore.setView('U17')"
+    @logout="onLogout"
   />
   <U16ChatView v-else-if="currentView === 'U16'" @back="appStore.setView('U12')" />
   <U17AdminPanelView v-else-if="currentView === 'U17'" @back="appStore.setView('U15')" />

@@ -60,8 +60,19 @@ const load = async () => {
     if (orderResult.status === "fulfilled") orders.value = orderResult.value;
     if (runnerReviewResult.status === "fulfilled") {
       runnerReviews.value = runnerReviewResult.value;
+      console.info(
+        "[gofer] admin.runnerReviews.loaded",
+        runnerReviewResult.value.map((item) => ({
+          id: item.id,
+          user_id: item.user_id,
+          phone: item.phone,
+          student_no: item.student_no,
+          verification_status: item.verification_status,
+        })),
+      );
     } else {
       runnerReviews.value = [];
+      console.error("[gofer] admin.runnerReviews.load_failed", runnerReviewResult.reason);
       ElMessage.warning("跑腿员审核列表加载失败，已隐藏该页数据");
     }
 

@@ -17,9 +17,7 @@ export const setAuth = (role: UserRole, token = "mock-token", userId?: string, p
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(ROLE_KEY, role);
   if (userId) localStorage.setItem(USER_ID_KEY, userId);
-  else localStorage.removeItem(USER_ID_KEY);
   if (phone) localStorage.setItem(USER_PHONE_KEY, phone);
-  else localStorage.removeItem(USER_PHONE_KEY);
 };
 
 export const clearAuth = () => {
