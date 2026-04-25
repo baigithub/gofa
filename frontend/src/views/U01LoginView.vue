@@ -5,7 +5,10 @@ import MobileFrame from "../components/MobileFrame.vue";
 import { login, sendCode } from "../api/auth";
 
 const emit = defineEmits<{
-  (event: "login-success", payload?: { role: "user" | "runner" | "admin"; token: string; userId: string }): void;
+  (
+    event: "login-success",
+    payload?: { role: "user" | "runner" | "admin"; token: string; userId: string; phone: string },
+  ): void;
 }>();
 
 const phone = ref("");
@@ -46,7 +49,7 @@ const submit = async () => {
       return;
     }
     ElMessage.success("登录成功");
-    emit("login-success", result);
+    emit("login-success", { ...result, phone: phone.value });
   } catch (error) {
     const message = error instanceof Error ? error.message : "登录失败，请稍后重试";
     ElMessage.error(message);

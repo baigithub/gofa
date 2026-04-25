@@ -195,26 +195,27 @@ def list_runner_verifications_api(admin_user_id: str = Query(...), db: Session =
 
     data = []
     for item in items:
-        images = []
-        if item.credential_images:
+        images = item.get("credential_images") or []
+        if isinstance(images, str):
             try:
-                parsed = json.loads(item.credential_images)
+                parsed = json.loads(images)
                 images = [img for img in parsed if isinstance(img, str)]
             except json.JSONDecodeError:
                 images = []
         data.append(
             RunnerVerificationItem(
-                id=item.id,
-                user_id=item.user_id,
-                student_no=item.student_no,
+                id=item["id"],
+                user_id=item["user_id"],
+                phone=item.get("phone", ""),
+                student_no=item.get("student_no"),
                 credential_images=images,
-                verification_status=item.verification_status,
-                rejection_reason=item.rejection_reason,
-                reviewed_by=item.reviewed_by,
-                reviewed_at=item.reviewed_at,
-                is_verified=item.is_verified,
-                created_at=item.created_at,
-                updated_at=item.updated_at,
+                verification_status=item.get("verification_status", "pending"),
+                rejection_reason=item.get("rejection_reason"),
+                reviewed_by=item.get("reviewed_by"),
+                reviewed_at=item.get("reviewed_at"),
+                is_verified=item.get("is_verified", False),
+                created_at=item["created_at"],
+                updated_at=item["updated_at"],
             ).model_dump()
         )
     return success(data)

@@ -3,12 +3,14 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..core import error_codes
 from ..core.db import get_db
 from ..core.exceptions import ApiException
 from ..core.response import success
+from ..models import User
 from ..schemas.runner import (
     ChatMessageItem,
     ReviewItem,
@@ -16,8 +18,10 @@ from ..schemas.runner import (
     RunnerActionResponse,
     RunnerOrderItem,
     SendChatMessageRequest,
+    SubmitRunnerVerificationRequest,
     UploadCredentialImageResponse,
 )
+from ..services.admin_service import get_runner_dashboard_stats, submit_runner_verification
 from ..services.runner_service import (
     accept_order,
     delivered_order,
@@ -27,7 +31,6 @@ from ..services.runner_service import (
     send_order_chat,
     submit_review,
 )
-from ..services.admin_service import get_runner_dashboard_stats
 
 router = APIRouter(prefix="/api/v1/runner", tags=["runner"])
 UPLOAD_DIR = Path("uploadfile")
@@ -52,6 +55,22 @@ async def upload_credential_image_api(file: UploadFile = File(...)):
             filename=file.filename or safe_name,
         ).model_dump()
     )
+
+
+@router.post("/verification/submit")
+def submit_runner_verification_api(payload: SubmitRunnerVerificationRequest, db: Session = Depends(get_db)):
+    try:
+        user = db.execute(select(User).where(User.phone == payload.user_id)).scalar_one_or_none()
+        user_id = user.id if user else payload.user_id
+        item = submit_runner_verification(
+            db,
+            user_id=user_id,
+            student_no=payload.student_no,
+            credential_images=payload.credential_images,
+        )
+    except ValueError as exc:
+        raise ApiException(error_codes.BAD_REQUEST, str(exc), status_code=400) from exc
+    return success({"success": True, "runner_profile_id": item.id})
 
 
 @router.get("/stats")
@@ -139,4 +158,3 @@ def get_review_api(order_id: str, db: Session = Depends(get_db)):
     if review is None:
         return success(None)
     return success(ReviewItem.model_validate(review).model_dump())
-

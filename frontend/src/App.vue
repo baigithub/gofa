@@ -70,11 +70,17 @@ const onGoOrder = () => {
   appStore.setView("U11");
 };
 
-const onUserLogin = (payload?: { role?: "user" | "runner" | "admin"; token?: string; userId?: string }) => {
+const onUserLogin = (payload?: { role?: "user" | "runner" | "admin"; token?: string; userId?: string; phone?: string }) => {
   const role = payload?.role ?? "user";
-  setAuth(role, payload?.token, payload?.userId);
+  console.info("[gofer] login.success", {
+    role,
+    userId: payload?.userId ?? null,
+    phone: payload?.phone ?? null,
+  });
+  setAuth(role, payload?.token, payload?.userId, payload?.phone);
   appStore.setRole(role);
   appStore.setUserId(payload?.userId ?? null);
+  appStore.setUserPhone(payload?.phone ?? null);
   appStore.setView("U02");
 };
 
@@ -82,6 +88,7 @@ const onGoRunner = () => {
   setAuth("runner");
   appStore.setRole("runner");
   appStore.setUserId(null);
+  appStore.setUserPhone(null);
   appStore.setView("R01");
 };
 
@@ -152,7 +159,13 @@ watch(currentView, (view) => {
   />
   <U16ChatView v-else-if="currentView === 'U16'" @back="appStore.setView('U12')" />
   <U17AdminPanelView v-else-if="currentView === 'U17'" @back="appStore.setView('U15')" />
-  <R01RunnerLoginView v-else-if="currentView === 'R01'" @next="appStore.setView('R02')" @back-home="appStore.setView('U02')" />
+  <R01RunnerLoginView
+    v-else-if="currentView === 'R01'"
+    :user-id="appStore.userId"
+    :user-phone="appStore.userPhone"
+    @next="appStore.setView('R02')"
+    @back-home="appStore.setView('U02')"
+  />
   <R02RunnerHallView
     v-else-if="currentView === 'R02'"
     @next="appStore.setView('R03')"

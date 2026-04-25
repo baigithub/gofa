@@ -49,6 +49,15 @@ export const uploadCredentialImage = async (file: File) => {
   };
 };
 
+export const submitRunnerVerification = async (payload: {
+  user_id: string;
+  student_no?: string | null;
+  credential_images: string[];
+}) => {
+  const { data } = await http.post<ApiResult<{ success: boolean; runner_profile_id: string }>>("/runner/verification/submit", payload);
+  return unwrap(data);
+};
+
 export const fetchOrderChats = async (orderId: string) => {
   const { data } = await http.get<ApiResult<ChatMessageItem[]>>(`/runner/orders/${encodeURIComponent(orderId)}/chats`);
   return unwrap(data);

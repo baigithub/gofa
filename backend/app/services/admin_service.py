@@ -207,8 +207,15 @@ def list_runner_verifications(db: Session) -> list[dict]:
             RunnerProfile.id,
             RunnerProfile.user_id,
             RunnerProfile.student_no,
+            RunnerProfile.credential_images,
+            RunnerProfile.verification_status,
+            RunnerProfile.rejection_reason,
+            RunnerProfile.reviewed_by,
+            RunnerProfile.reviewed_at,
+            RunnerProfile.is_verified,
             RunnerProfile.created_at,
             RunnerProfile.updated_at,
+            User.phone,
         )
         .join(User, RunnerProfile.user_id == User.id)
         .order_by(RunnerProfile.updated_at.desc())
@@ -218,13 +225,14 @@ def list_runner_verifications(db: Session) -> list[dict]:
         {
             "id": row.id,
             "user_id": row.user_id,
+            "phone": row.phone,
             "student_no": row.student_no,
-            "credential_images": [],
-            "verification_status": "pending",
-            "rejection_reason": None,
-            "reviewed_by": None,
-            "reviewed_at": None,
-            "is_verified": False,
+            "credential_images": row.credential_images,
+            "verification_status": row.verification_status,
+            "rejection_reason": row.rejection_reason,
+            "reviewed_by": row.reviewed_by,
+            "reviewed_at": row.reviewed_at,
+            "is_verified": row.is_verified,
             "created_at": row.created_at,
             "updated_at": row.updated_at,
         }

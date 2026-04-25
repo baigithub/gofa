@@ -25,6 +25,7 @@ export type AdminOrderItem = {
 export type RunnerVerificationItem = {
   id: string;
   user_id: string;
+  phone: string;
   student_no: string | null;
   credential_images: string[];
   verification_status: "pending" | "approved" | "rejected" | string;

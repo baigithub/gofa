@@ -47,6 +47,7 @@ export const useAppStore = defineStore("app", {
     payStatus: "idle" as PayStatus,
     userRole: "user" as UserRole,
     userId: null as string | null,
+    userPhone: null as string | null,
     activeOrderId: "latest",
     chatMessages: [] as ChatMessage[],
   }),
@@ -86,6 +87,9 @@ export const useAppStore = defineStore("app", {
     },
     setUserId(userId: string | null) {
       this.userId = userId;
+    },
+    setUserPhone(userPhone: string | null) {
+      this.userPhone = userPhone;
     },
     setActiveOrderId(orderId: string) {
       this.activeOrderId = orderId || "latest";

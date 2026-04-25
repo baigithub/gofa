@@ -11,6 +11,7 @@ import {
   fetchRunnerVerifications,
   fetchUsers,
   resetUserPassword,
+  reviewRunnerVerification,
   setRoleEnabled,
   setUserEnabled,
   setUserRole,
@@ -107,6 +108,30 @@ const verificationStatusLabel = (status: string) => {
   if (status === "approved") return "已通过";
   if (status === "rejected") return "已拒绝";
   return status;
+};
+
+const approveReview = async (item: RunnerVerificationItem) => {
+  if (!adminUserId.value) return;
+  try {
+    await reviewRunnerVerification(adminUserId.value, item.id, { approve: true });
+    ElMessage.success("已通过审核");
+    await load();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "操作失败";
+    ElMessage.error(msg);
+  }
+};
+
+const rejectReview = async (item: RunnerVerificationItem) => {
+  if (!adminUserId.value) return;
+  try {
+    await reviewRunnerVerification(adminUserId.value, item.id, { approve: false, rejection_reason: "资料不符合要求" });
+    ElMessage.success("已拒绝审核");
+    await load();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "操作失败";
+    ElMessage.error(msg);
+  }
 };
 
 const updateRole = async (u: UserItem, role: UserItem["role"]) => {
@@ -386,13 +411,17 @@ const reviewPageLabel = computed(() => {
             <template v-else>
               <div class="review-grid">
                 <el-card v-for="item in pagedRunnerReviews" :key="item.id" class="review-item" shadow="never">
-                  <div class="review-line"><span>账号</span><strong>{{ item.user_id }}</strong></div>
+                  <div class="review-line"><span>手机号</span><strong>{{ item.phone }}</strong></div>
                   <div class="review-line"><span>学号</span><strong>{{ item.student_no || '—' }}</strong></div>
                   <div class="review-line"><span>状态</span><strong>{{ verificationStatusLabel(item.verification_status) }}</strong></div>
-                  <div v-if="item.credential_images?.length" class="credential-images">
-                    <img v-for="img in item.credential_images" :key="img" class="credential-thumb" :src="img" :alt="img" />
+                  <div class="review-line"><span>校园材料图片</span>
+                    <strong v-if="item.credential_images?.length">{{ item.credential_images.length }} 张</strong>
+                    <strong v-else>暂无</strong>
                   </div>
-                  <div v-else class="credential-empty">暂无认证图片</div>
+                  <div class="actions review-actions">
+                    <el-button size="small" round type="success" plain @click="approveReview(item)">通过</el-button>
+                    <el-button size="small" round type="danger" plain @click="rejectReview(item)">拒绝</el-button>
+                  </div>
                 </el-card>
               </div>
               <div class="order-pager">
@@ -548,26 +577,7 @@ const reviewPageLabel = computed(() => {
   word-break: break-word;
 }
 
-.credential-images {
-  margin-top: 8px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
 
-.credential-thumb {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid rgba(123, 155, 232, 0.18);
-}
-
-.credential-empty {
-  margin-top: 8px;
-  color: rgba(167, 186, 227, 0.75);
-  font-size: 12px;
-}
 
 .order-pager {
   margin-top: 10px;
@@ -683,6 +693,10 @@ const reviewPageLabel = computed(() => {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
+}
+
+.review-actions {
+  margin-top: 12px;
 }
 
 .actions :deep(.el-button) {

@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import AppNavBar from "../components/AppNavBar.vue";
 import MobileFrame from "../components/MobileFrame.vue";
 import { useAppStore } from "../stores/app";
+import { getUserId, getUserPhone } from "../core/auth";
 
 const emit = defineEmits<{
   (event: "back-home"): void;
@@ -11,12 +13,18 @@ const emit = defineEmits<{
 
 const appStore = useAppStore();
 
-const profile = {
-  name: "张同学",
-  phone: "138****8888",
-  level: "普通会员",
-  score: 86,
-};
+const profilePhone = computed(() => appStore.userPhone || getUserPhone() || getUserId() || "17800000011");
+const profileLevel = computed(() =>
+  appStore.userRole === "admin" ? "管理员" : appStore.userRole === "runner" ? "跑腿员" : "普通用户",
+);
+
+console.info("[gofer] profile.render", {
+  appStorePhone: appStore.userPhone,
+  localPhone: getUserPhone(),
+  userId: getUserId(),
+  role: appStore.userRole,
+  resolvedPhone: profilePhone.value,
+});
 
 const quickEntries = [
   { title: "常用地址", desc: "1号宿舍楼 / 图书馆 / 教学楼A" },
@@ -34,15 +42,15 @@ const quickEntries = [
         <el-card class="user-card" shadow="never">
           <div class="user-head">
             <div>
-              <div class="name">{{ profile.name }}</div>
-              <div class="phone">手机号：{{ profile.phone }}</div>
+              <div class="name">张同学</div>
+              <div class="phone">手机号：{{ profilePhone }}</div>
             </div>
-            <el-tag type="primary" effect="dark" round>{{ profile.level }}</el-tag>
+            <el-tag class="vip-tag" effect="dark" round>{{ profileLevel }}</el-tag>
           </div>
           <el-divider />
           <div class="score">
             <span>信用分</span>
-            <strong>{{ profile.score }}</strong>
+            <strong>86</strong>
           </div>
         </el-card>
 
@@ -131,6 +139,12 @@ const quickEntries = [
 .score strong {
   color: #7ef0bf;
   font-size: 22px;
+}
+
+:deep(.vip-tag) {
+  color: #fff7eb;
+  border: 1px solid rgba(255, 158, 64, 0.45);
+  background: linear-gradient(135deg, #ffb15c, #ff8a1f) !important;
 }
 
 .entry-title {

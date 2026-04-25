@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import AppNavBar from "../components/AppNavBar.vue";
 import MobileFrame from "../components/MobileFrame.vue";
-import { uploadCredentialImage } from "../api/runner";
+import { submitRunnerVerification, uploadCredentialImage } from "../api/runner";
+
+const props = defineProps<{
+  userId: string | null;
+  userPhone: string | null;
+}>();
 
 const emit = defineEmits<{
   (event: "next"): void;
@@ -17,6 +22,16 @@ const credentialImages = ref<Array<{ name: string; url: string }>>([]);
 const fileInput = ref<HTMLInputElement | null>(null);
 const isUploading = ref(false);
 const isSubmitting = ref(false);
+
+watch(
+  () => props.userPhone,
+  (value) => {
+    if (value && !phone.value) phone.value = value;
+  },
+  { immediate: true },
+);
+
+const resolvedUserId = computed(() => props.userId || props.userPhone || "");
 
 const canSubmit = computed(() => {
   const phoneValue = phone.value.trim();
@@ -51,23 +66,37 @@ const onFileSelected = async (event: Event) => {
   }
 };
 
-const submit = () => {
+const submit = async () => {
   if (!canSubmit.value) {
     ElMessage.warning("请完整填写认证信息后再提交");
     return;
   }
+  if (!resolvedUserId.value) {
+    ElMessage.error("缺少当前登录用户信息，请先登录");
+    return;
+  }
   isSubmitting.value = true;
-  console.info("[gofer] submit R01 runner verification", {
+  console.info("[gofer] submit runner verification", {
+    userId: resolvedUserId.value,
     phone: phone.value,
     studentNo: studentNo.value,
     emergencyContact: emergencyContact.value,
     imageCount: credentialImages.value.length,
   });
-  window.setTimeout(() => {
+  try {
+    await submitRunnerVerification({
+      user_id: resolvedUserId.value,
+      student_no: studentNo.value.trim(),
+      credential_images: credentialImages.value.map((image) => image.url),
+    });
     ElMessage.success("认证材料已提交，等待管理员审核");
-    isSubmitting.value = false;
     emit("next");
-  }, 500);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "提交失败";
+    ElMessage.error(msg);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 </script>
 
